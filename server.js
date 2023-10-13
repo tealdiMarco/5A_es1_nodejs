@@ -7,6 +7,7 @@
 
 !   per avviare server uso comando terminale: node server.js
 */
+const { info } = require("console");
 const http = require("http");
 const url = require("url");
 
@@ -31,27 +32,21 @@ var server = http.createServer(function(request, response){
         parametri: ${infoUrl.search}
     `;
 
-    // Estraggo i parametri
-    let parametri = infoUrl.query;
+    switch (infoUrl.pathname){
+        case "richiesta":
+            stampaRichiesta(testoRisposta, response, infoUrl);
+            break;
+        default:
+            let header = {"Content-Type":"text/plain"}
 
-    testoRisposta += `
-        action: ${parametri.action}
-        parametro1: ${parametri.p1}
-    `;
+            response.writeHead(404,header);
+            response.write("Nessuna Risorsa Trovata");
+            response.end();
 
-/************************ RISPOSTA  *********************************/    
-    let header = {"Content-Type":"text/plain"}
-    /*
-        1° parametro-> codice di risposta (404 | 202)
-        2° parametro-> Oggetto json-> insieme di opzioni che vogliamo inserire nell'intestazione
-    */
-    response.writeHead(200,header);
+            break;
+    }
 
-    // Modificare il contenuto del pacchetto (Posso richiamare write anche piu di una volta-> Aggiungo sempre)
-    response.write("Luca frocio per i LEGO \n"+ testoRisposta);
-
-    // Informo il server che ho terminato di preparare il pacchetto di risposta
-    response.end();
+    
 
 });
 /*
@@ -67,3 +62,34 @@ console.log("Il server è stato avviato sulla porta 1337");
 
 // Serializzare -> trasformo oggetto in stringa
 // parse -> trasformo stringa in oggetto
+// risorsa statica -> NON VARIA (FOTO,VIDEO)
+// risorsa dinamica -> VARIA DINAMICAMENTE
+
+
+function stampaRichiesta(testoRisposta, response, infoUrl){
+    // Estraggo i parametri
+    let parametri = infoUrl.query;
+
+    testoRisposta += `
+        action: ${parametri.action}
+        parametro1: ${parametri.p1}
+    `;
+
+/************************ RISPOSTA  *********************************/    
+    let header = {"Content-Type":"text/plain"}
+    /*
+        1° parametro-> codice di risposta (404 | 202)
+        2° parametro-> Oggetto json-> insieme di opzioni che vogliamo inserire nell'intestazione
+
+        Content-Type: text/plain|text/html|application/json
+
+
+    */
+    response.writeHead(200,header);
+
+    // Modificare il contenuto del pacchetto (Posso richiamare write anche piu di una volta-> Aggiungo sempre)
+    response.write("Luca frocio per i LEGO \n"+ testoRisposta);
+
+    // Informo il server che ho terminato di preparare il pacchetto di risposta
+    response.end();
+}
